@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 # ==========================================
 # 1. 硬件设备配置 (GPU/CPU)
 # ==========================================
-# 检查 GPU 是否可用，若可用则优先使用 CUDA 设备
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
@@ -35,16 +34,12 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False,num_
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        # 卷积层 1: 1 个输入通道, 10 个输出通道, 卷积核 5x5
         self.conv1 = nn.Conv2d(1, 10, kernel_size=3)
-        # 卷积层 2: 10 个输入通道, 20 个输出通道, 卷积核 5x5
         self.conv2 = nn.Conv2d(10, 20, kernel_size=2)
         self.conv3 = nn.Conv2d(20, 30, kernel_size=3)
-        # 最大池化层: 窗口大小 3x3
         self.pooling1 = nn.MaxPool2d(2)
         self.pooling2 = nn.MaxPool2d(2)
         self.pooling3 = nn.MaxPool2d(2)
-        # 全连接层: 将展平后的 320 维特征映射到 10 个分类类别
         self.linear1 = nn.Linear(120, 60)
         self.linear2 = nn.Linear(60, 30)
         self.linear3 = nn.Linear(30, 10)
@@ -52,7 +47,6 @@ class Net(nn.Module):
     def forward(self, x):
         # 提取 Batch 维度
         batch_size = x.size(0)
-        # 卷积 -> 池化 -> ReLU 激活
         x = self.pooling1(F.relu(self.conv1(x)))
         x = self.pooling2(F.relu(self.conv2(x)))
         x = self.pooling3(F.relu(self.conv3(x)))
@@ -60,12 +54,9 @@ class Net(nn.Module):
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
         x =self.linear3(x)
-        # 将特征展平为一维向量: (batch_size, 20 * 4 * 4) -> (batch_size, 320)
-        # 经过全连接层输出
 
         return x
 
-# 实例化模型并将其部署到 GPU 设备上
 model = Net()
 model.to(device)
 
